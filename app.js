@@ -2,49 +2,25 @@ const express = require("express");
 const mongoose = require("mongoose");
 const _ = require("lodash");
 
-const app = express();
+const {Item} = require(__dirname + "/models/item.js");
+const List = require(__dirname + "/models/list.js");
 
-const items = ["Buy Food", "Cook Food"];
-const workItems = [];
+const app = express();
 
 app.set("view engine", "ejs");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
+
 mongoose.set('useFindAndModify', false);
-
 mongoose.connect("mongodb://localhost:27017/todolistDB", { useNewUrlParser: true, useUnifiedTopology: true });
-
-const itemsSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    }
-});
-
-const Item = mongoose.model("Item", itemsSchema);
 
 const item1 = new Item({
     name: "Welcome to your todolist."
 });
 
-const item2 = new Item({
-    name: "Lunch"
-});
-
-const item3 = new Item({
-    name: "Go to the gim"
-});
-
-const defaultItems = [item1, item2, item3];
-
-const listSchema = new mongoose.Schema({
-    name: String,
-    items: [itemsSchema]
-});
-
-const List = mongoose.model("List", listSchema);
+const defaultItems = [item1];
 
 app.get("/", function(req, res){
     Item.find({}, function(err, foundItems){
@@ -127,16 +103,6 @@ app.get("/:customListName", function(req, res){
         }
     });
 
-});
-
-app.get("/work", function(req, res){
-    res.render("list", {listTitle: "Work", newListItems: workItems});
-});
-
-app.post("/work", function(req, res){
-    let item = req.body.newItem;
-    workItems.push(item);
-    res.redirect("/work");
 });
 
 app.get("/about", function(req, res){
